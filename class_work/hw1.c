@@ -1,8 +1,8 @@
 /*
- * Description: This program creates one parent process and two child processes.
+ * This program creates one parent process and two child processes.
  * The first child executes "ls -F" to list directory contents and writes the output
  * to a pipe. The second child reads from that pipe and executes "nl" to number the lines.
- * The parent process waits for both children to finish.
+ * The parent process waits for both children to finish. 
  */
 #include <stdio.h>
 #include <stdlib.h>

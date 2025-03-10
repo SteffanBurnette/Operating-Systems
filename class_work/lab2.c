@@ -8,7 +8,7 @@
 #include <sys/wait.h>
 
 /* -------------------------------------------
-   Part 2: File Positioning with lseek
+   Part 2: File Positioning with lseek 
    ------------------------------------------- */
 
 // Part 2 Basic: Open a file, write initial text, reposition, and overwrite part of it.

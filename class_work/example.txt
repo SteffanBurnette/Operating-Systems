@@ -1,2 +1,26 @@
-Hello, world!
-This text is appended.
+This is new content
+This is new appended content
+This is new appended content
+This is new appended content
+This is new appended content
+This is new appended content
+This is new appended content
+This is new appended content
+Original
+The duplicate
+I will be printed in the file example.txt
+This is new appended content
+Original
+The duplicate
+This is new appended content
+Original
+The duplicate
+This is new appended content
+Original
+The duplicate
+This is new appended content
+Original
+The duplicate
+This is new appended content
+Original
+The duplicate

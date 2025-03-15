@@ -344,7 +344,7 @@ int main(){
         //Writes to the file by moving the pointer to the next unwritten part.
         write(fd, my_buffer + written, bytes_to_write);
 
-        //Ensures that on the next loop iteration, we write the next chunk.
+        //Ensures that on the next loop iteration, we write the next chunk..
         written += bytes_to_write;
     }
 

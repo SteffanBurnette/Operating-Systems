@@ -349,7 +349,7 @@ int main(){
     }
 
     close(fd); //closes the file
-    free(my_buffer); //frees the buffer to prevent leaks
+    free(my_buffer); //frees the buffer to prevent leaks 
     printf("1MB buffer written successfully in chunks!\n");
 
 

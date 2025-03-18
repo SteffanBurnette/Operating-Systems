@@ -21,7 +21,10 @@ void search_and_replace(const char *filename) {
     }
     //the buffer
     char buffer[BUFFER_SIZE];
-    ssize_t bytes_read; //the number of bytes to be read
+    //a signed integer type used 
+    //for functions that return sizes or counts of bytes.
+    //Can hold negative values
+    ssize_t bytes_read; //the number of bytes to be read,
     off_t offset = 0; // Track position in file
     
     //Will loop until you are un able to read 
@@ -51,7 +54,7 @@ void search_and_replace(const char *filename) {
     close(fd);
 }
 
-
+//global variable that stores error messages
 extern int errno;
 
 //Will be used to rotate around a file
@@ -60,7 +63,7 @@ void circular_seek(int fd, int step, int file_size) {
     int pos = 0;
     for (int i = 0; i < 5; i++) { // Move 5 times
         pos = (pos + step) % file_size; // Circular position
-        lseek(fd, pos, SEEK_SET);
+        lseek(fd, pos, SEEK_SET);//Moves pointer relative to beginning of the file
         write(fd, "*", 1);
     }
 }
@@ -154,6 +157,11 @@ int main(){
 
     // Move file pointer 5 bytes ahead from the beginning
     lseek(my_file_csi, 5, SEEK_SET);
+
+`   //Will not throw an error since it will be at the end of the content in the file 
+    //but not at the end of the file per say, (the value will be void)
+    //lseek(my_file_csi, 5, SEEK_END);
+
     // Overwrite the next characters with "CSC332-OS"
     write(my_file_csi, "CSC332-OS", strlen("CSC332-OS"));
     
@@ -238,7 +246,7 @@ int main(){
        // Redirect stderr to errors.log
        dup2(my_file_er, 1);
        // This error message goes to errors.log instead of the terminal
-       fprintf(stderr, "An error occurred: File not found!\n");
+       fprintf(stderr, "An error occurred: File not found! (Not an actual error)\n");
        close(my_file_er);
 
 

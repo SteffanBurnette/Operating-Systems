@@ -6,8 +6,9 @@
 
 #define BUF_SIZE 12  // Define the buffer size for reading and writing
 
-// Function to reverse a block of data using pointer arithmetic
-void reverse_buffer(char *buffer, ssize_t len) {
+// Function to reverse a block of data using pointer arithmetic 
+//Takes in the buffer being used and the size of the file(bytes)
+void reverse_buffer(char *buffer, ssize_t len) { //ssize_t signed long int, can return -1, holds bits
     char *start = buffer;         // Pointer to the start of the buffer
     char *end = buffer + len - 1; // Pointer to the end of the buffer
 
@@ -36,16 +37,19 @@ int main(int argc, char *argv[]) {
     }
 
     // Get file size using stat()
+    //struct stat is a system-defined structure that holds file metadata
+    //has to be a struct
     struct stat file_stat;
     if (fstat(src_fd, &file_stat) == -1) {  // Check if stat() call failed
         write(STDERR_FILENO, "Error getting file size\n", 24);
         close(src_fd);  // Close source file before exiting
         return 1;
     }
+    //.st_size gives the total number of bytes in the fil
     off_t file_size = file_stat.st_size;  // Store the file size
 
     // Open or create the destination file with write-only permission
-    int dest_fd = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int dest_fd = open(argv[2], O_WRONLY | O_CREAT | O_APPEND, 0644);
     if (dest_fd == -1) {  // Check if file opening/creation failed
         write(STDERR_FILENO, "Error opening destination file\n", 31);
         close(src_fd);  // Close source file before exiting

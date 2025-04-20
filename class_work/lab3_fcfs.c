@@ -69,4 +69,4 @@ int main()
     findavgTime(processes, n,  burst_time); 
     return 0; 
 } 
-// This code is contributed by Shivi_Aggarwal
+

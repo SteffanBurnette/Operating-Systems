@@ -15,7 +15,7 @@ typedef struct {
     int bt;      // Burst time
     int pr;      // Priority (low value = high priority)
     int rem;     // Remaining time
-    int ft;      // Finish time
+    int ft;      // Finish timee
 } Proc;
 
 int main() {

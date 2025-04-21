@@ -1,4 +1,3 @@
-// srtf.c
 // Simulate Shortest Remaining Time First scheduling (preemptive).
 // Prints per-time-unit CPU, waiting queue, completed list,
 // then computes TAT, WT, total TAT, average WT, and draws a Gantt chart.
@@ -17,7 +16,7 @@ typedef struct {
 } Proc;
 
 int main() {
-    // 1) Define processes
+    //Processes
     Proc p[N] = {
         {'A', 1, 4, 4, 0},
         {'B', 2, 2, 2, 0},
@@ -35,9 +34,9 @@ int main() {
     char done[100][N];         // completed list snapshots
     int done_count[100] = {0};
 
-    // 2) Simulation loop
+    //Simulation loop
     while (completed < N) {
-        // a) pick the ready process with smallest remaining time
+        //Choosing the ready process with smallest remaining time
         int idx = -1;
         for (int i = 0; i < N; i++) {
             if (p[i].at <= time && p[i].rem > 0) {
@@ -47,7 +46,7 @@ int main() {
             }
         }
 
-        // b) record waiting queue (all ready & unfinished except current)
+        //record waiting queue (all ready & unfinished except current)
         int wc = 0;
         for (int i = 0; i < N; i++) {
             if (i != idx && p[i].at <= time && p[i].rem > 0) {
@@ -56,7 +55,7 @@ int main() {
         }
         wait_count[time] = wc;
 
-        // c) record already completed
+        //record already completed
         int dc = 0;
         for (int i = 0; i < N; i++) {
             if (p[i].rem == 0) {
@@ -65,7 +64,7 @@ int main() {
         }
         done_count[time] = dc;
 
-        // d) run CPU for one time unit
+        //run CPU for one time unit
         if (idx >= 0) {
             gantt[time] = p[idx].pid;
             p[idx].rem--;
@@ -82,7 +81,7 @@ int main() {
 
     int T = time - 1;  // total time slots used
 
-    // 3) Print per-time-unit table
+    //Print per-time-unit table
     printf("Time\tCPU\tWaiting\tCompleted\n");
     for (int t = 1; t <= T; t++) {
         printf("%d\t %c\t", t, gantt[t]);
@@ -102,7 +101,7 @@ int main() {
         printf("\n");
     }
 
-    // 4) Compute and print metrics
+    //Compute and print metrics
     int total_tat = 0;
     int total_wt  = 0;
     printf("\nProcess\tAT\tBT\tFT\tTAT\tWT\n");
@@ -117,7 +116,7 @@ int main() {
     printf("\nTotal Turnaround Time = %d\n", total_tat);
     printf("Average Waiting Time   = %.2f\n", total_wt / (float)N);
 
-    // 5) Gantt Chart
+    //Gantt Chart
     printf("\nGantt Chart:\n|");
     for (int t = 1; t <= T; t++) {
         printf("%c|", gantt[t]);

@@ -18,7 +18,7 @@ typedef struct {
 } Proc;
 
 int main() {
-    // 1) Define the processes
+    //The processes
     Proc p[N] = {
         {'A', 1, 4, 4, 0},
         {'B', 2, 2, 2, 0},
@@ -38,7 +38,7 @@ int main() {
     char done[100][N];    // snapshots of completed processes
     int done_count[100] = {0};
 
-    // 2) Main simulation loop
+    
     while (completed < N) {
         // Enqueue any newly arrived processes
         for (int i = 0; i < N; i++) {
@@ -109,7 +109,7 @@ int main() {
         printf("\n");
     }
 
-    // 4) Compute metrics
+    //Metrics
     int total_tat = 0;
     int total_wt  = 0;
     printf("\nProcess\tAT\tBT\tFT\tTAT\tWT\n");

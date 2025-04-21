@@ -1,12 +1,10 @@
-// C program for implementation of FCFS  
-// scheduling 
+// C program for implementation of FCFS scheduling 
 #include<stdio.h> 
-// Function to find the waiting time for all  
-// processes 
+// Function to find the waiting time for all processes
 void findWaitingTime(int processes[], int n,  
                           int bt[], int wt[]) 
 { 
-    // waiting time for first process is 0 
+    //waiting time for first process is 0 
     wt[0] = 0; 
   
     // calculating waiting time 
@@ -18,8 +16,7 @@ void findWaitingTime(int processes[], int n,
 void findTurnAroundTime( int processes[], int n,  
                   int bt[], int wt[], int tat[]) 
 { 
-    // calculating turnaround time by adding 
-    // bt[i] + wt[i] 
+    // calculating turnaround time by adding bt[i] + wt[i] 
     for (int  i = 0; i < n ; i++) 
         tat[i] = bt[i] + wt[i]; 
 } 
@@ -38,8 +35,7 @@ void findavgTime( int processes[], int n, int bt[])
     //Display processes along with all details 
     printf("\nProcesses   Burst time   Waiting time   Turn around time\n"); 
   
-    // Calculate total waiting time and total turn  
-    // around time 
+    // Calculate total waiting time and total turn around time 
     for (int  i=0; i<n; i++) 
     { 
         total_wt = total_wt + wt[i]; 
@@ -56,7 +52,7 @@ void findavgTime( int processes[], int n, int bt[])
     printf("Average turn around time = %f ",t); 
 } 
   
-// Driver code 
+ 
 int main() 
 { 
     //process id's 

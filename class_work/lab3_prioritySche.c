@@ -1,6 +1,5 @@
 // priority_np_commented.c
-// Simulate Non-Preemptive Priority scheduling (low number = high priority).
-// Includes only <stdio.h> and <stdlib.h>.
+// Non-Preemptive Priority scheduling (low number = high priority).
 // Outputs per-time-unit CPU execution, waiting queue, completed list,
 // then computes Turnaround Time (TAT), Waiting Time (WT), total TAT,
 // average WT, and prints a Gantt chart.

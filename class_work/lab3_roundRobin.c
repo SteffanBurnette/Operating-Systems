@@ -1,5 +1,4 @@
-// round_robin.c
-// Simulate Round Robin scheduling (quantum = 1)
+// Round Robin scheduling (quantum = 1)
 // Prints per-time-unit CPU, waiting queue, completed list,
 // then computes TAT, WT, total TAT, average WT, and draws a Gantt chart.
 

@@ -7,87 +7,72 @@
 // fcfs - fifo queue (nonpreemeptive)
 
 
-#include <stdio.h>
-
-#define N 4 // Number of processes
-
-// Define the structure for Process
-typedef struct {
-    char pid;     // Process ID (A, B, C, D, etc.)
-    int at;       // Arrival Time
-    int bt;       // Burst Time
-    int ct;       // Completion Time
-    int tat;      // Turnaround Time
-    int wt;       // Waiting Time
-} Proc;
-
-// Function to calculate Turnaround Time and Completion Time
-void findTurnAroundTime(Proc p[], int n) {
-    // Completion Time for the first process is its Arrival Time + Burst Time
-    p[0].ct = p[0].at + p[0].bt;
-
-    // Calculate Completion Time for other processes based on the previous completion time
-    for (int i = 1; i < n; i++) {
-        p[i].ct = p[i - 1].ct + p[i].bt;
-    }
-
-    // Calculate Turnaround Time (TAT) = Completion Time - Arrival Time
-    for (int i = 0; i < n; i++) {
-        p[i].tat = p[i].ct - p[i].at;
-    }
-}
-
-// Function to calculate Waiting Time (WT)
-void findWaitingTime(Proc p[], int n) {
-    // Calculate Waiting Time (WT) = Turnaround Time - Burst Time
-    for (int i = 0; i < n; i++) {
-        p[i].wt = p[i].tat - p[i].bt;
-
-        // Ensure that Waiting Time is not negative
-        if (p[i].wt < 0) {
-            p[i].wt = 0; // Set WT to 0 if it is negative (i.e., no waiting time)
-        }
-    }
-}
-
-// Function to calculate and display average times
-void findAvgTime(Proc p[], int n) {
-    int total_wt = 0, total_tat = 0;
-
-    // Calculate Waiting Time and Turnaround Time
-    findWaitingTime(p, n);
-    findTurnAroundTime(p, n);
-
-    // Display process details (Process ID, Arrival Time, Burst Time, Waiting Time, Turnaround Time, Completion Time)
-    printf("\nProcesses   Arrival Time   Burst time   Waiting time   Turn around time   Completion time\n");
-    for (int i = 0; i < n; i++) {
-        total_wt += p[i].wt;
-        total_tat += p[i].tat;
-        printf("   %c         %d            %d           %d               %d               %d\n",
-               p[i].pid, p[i].at, p[i].bt, p[i].wt, p[i].tat, p[i].ct);
-    }
-
-    // Calculate and display average waiting time and turnaround time
-    float avg_wt = (float)total_wt / n;
-    float avg_tat = (float)total_tat / n;
-    printf("Average waiting time = %f\n", avg_wt);
-    printf("Average turn around time = %f\n", avg_tat);
-}
-
-int main() {
-    // Define the process data (Process ID, Arrival Time, Burst Time)
-    Proc p[N] = {
-        {'A', 1, 4, 0, 0, 0},  // Process A arrives at t=1, needs 4 units
-        {'B', 2, 2, 0, 0, 0},  // Process B arrives at t=2, needs 2 units
-        {'C', 4, 2, 0, 0, 0},  // Process C arrives at t=4, needs 2 units
-        {'D', 5, 3, 0, 0, 0}   // Process D arrives at t=5, needs 3 units
-    };
-
-    // Call the function to calculate and display average times
-    findAvgTime(p, N);
-
-    return 0;
-}
+/*
+ * FCFS Scheduling Program in C
+ */
+ 
+ #include <stdio.h>
+ int main()
+ {
+     int pid[15];
+     int bt[15];
+     int n;
+     //Takes in the number of process from the user
+     printf("Enter the number of processes: ");
+     scanf("%d",&n);
+     
+     //Takes in the process id from the end users
+     printf("Enter process id of all the processes: ");
+     for(int i=0;i<n;i++)
+     {
+         scanf("%d",&pid[i]);
+     }
+    
+     //Takes in the burst times of all the processes
+     printf("Enter burst time of all the processes: ");
+     for(int i=0;i<n;i++)
+     {
+         scanf("%d",&bt[i]);
+     }
+  
+     int i, wt[n];
+     wt[0]=0; //Initial wait time is 0 for the first process
+  
+     //for calculating waiting time of each process
+     for(i=1; i<n; i++)
+     {
+         wt[i]= bt[i-1]+ wt[i-1];
+     }
+  
+     printf("Process ID     Burst Time     Waiting Time     TurnAround Time\n");
+     float twt=0.0; //total wait time
+     float tat= 0.0;  //total turn around time
+     for(i=0; i<n; i++)
+     {
+         printf("%d\t\t", pid[i]);
+         printf("%d\t\t", bt[i]);
+         printf("%d\t\t", wt[i]);
+  
+         //calculating and printing turnaround time of each process
+         printf("%d\t\t", bt[i]+wt[i]);
+         printf("\n");
+  
+         //for calculating total waiting time
+         twt += wt[i];
+  
+         //for calculating total turnaround time
+         tat += (wt[i]+bt[i]);
+     }
+     float att,awt;
+  
+     //for calculating average waiting time
+     awt = twt/n; //divide by the number of processes
+  
+     //for calculating average turnaround time
+     att = tat/n;
+     printf("Avg. waiting time= %f\n",awt);
+     printf("Avg. turnaround time= %f",att);
+ }
 
 
 /**

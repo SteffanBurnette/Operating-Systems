@@ -1,98 +1,178 @@
-// The Link of the raw data log file: https://github.com/logpai/loghub/blob/master/Windows/Windows_2k.log_structured.csv
-// Feature of the dataset that I will be working with:
-// Is a .csv
-// Has 2000 rows of data
-// 6 columns per row
-// column categories: LineId, Date, Time, Level, Component, Content
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define MAX_LINE_LENGTH 1024
+#define MAX_UNIQUE      100  // Adjusted to account for a higher number of unique items (dates, times, components, levels)
 
 // Structure to hold the log entry
 typedef struct {
-    int LineId;
-    char Date[11];   // YYYY-MM-DD
-    char Time[9];    // HH:MM:SS
-    char Level[10];  // Log level like INFO, ERROR
+    int  LineId;
+    char Date[11];      // YYYY-MM-DD
+    char Time[9];       // HH:MM:SS
+    char Level[10];     // Log level like INFO, ERROR
     char Component[50]; // Component name
-    char Content[500]; // Content of the log
+    char Content[500];  // Content of the log
 } LogEntry;
 
-// Function to parse a CSV line
+// Simple name→count bucket
+typedef struct {
+    char  name[50];
+    size_t count;
+} Counter;
+
+// Parse one CSV line into log_entry; returns 1 on success
 int parse_log_line(char *line, LogEntry *log_entry) {
     char *token;
 
     // Get LineId
     token = strtok(line, ",");
-    if (token == NULL) return 0; // Error in parsing
-    log_entry->LineId = atoi(token);  // Convert to integer
+    if (token == NULL) return 0;
+    log_entry->LineId = atoi(token);
 
     // Get Date
     token = strtok(NULL, ",");
-    if (token == NULL) return 0; // Error in parsing
-    strncpy(log_entry->Date, token, sizeof(log_entry->Date));
+    if (token == NULL) return 0;
+    strncpy(log_entry->Date, token, sizeof(log_entry->Date)-1);
 
     // Get Time
     token = strtok(NULL, ",");
-    if (token == NULL) return 0; // Error in parsing
-    strncpy(log_entry->Time, token, sizeof(log_entry->Time));
+    if (token == NULL) return 0;
+    strncpy(log_entry->Time, token, sizeof(log_entry->Time)-1);
 
     // Get Level
     token = strtok(NULL, ",");
-    if (token == NULL) return 0; // Error in parsing
-    strncpy(log_entry->Level, token, sizeof(log_entry->Level));
+    if (token == NULL) return 0;
+    strncpy(log_entry->Level, token, sizeof(log_entry->Level)-1);
 
     // Get Component
     token = strtok(NULL, ",");
-    if (token == NULL) return 0; // Error in parsing
-    strncpy(log_entry->Component, token, sizeof(log_entry->Component));
+    if (token == NULL) return 0;
+    strncpy(log_entry->Component, token, sizeof(log_entry->Component)-1);
 
     // Get Content (remaining part of the line)
     token = strtok(NULL, ",");
-    if (token == NULL) return 0; // Error in parsing
-    strncpy(log_entry->Content, token, sizeof(log_entry->Content));
+    if (token == NULL) return 0;
+    strncpy(log_entry->Content, token, sizeof(log_entry->Content)-1);
 
     return 1; // Successfully parsed
 }
 
-// Function to process the CSV file
+// Look up key in counters[0..*n), bump its count, or add a new bucket
+void incr_counter(Counter *counters, size_t *n, size_t max, const char *key) {
+    for (size_t i = 0; i < *n; i++) {
+        if (strcmp(counters[i].name, key) == 0) {
+            counters[i].count++;
+            return;
+        }
+    }
+    if (*n < max) {
+        strncpy(counters[*n].name, key, sizeof(counters[*n].name)-1);
+        counters[*n].name[sizeof(counters[*n].name)-1] = '\0';
+        counters[*n].count = 1;
+        (*n)++;
+    }
+}
+
+// Function to process the CSV file using mmap
 void process_log_file(const char *filename) {
-    FILE *file = fopen(filename, "r");
-    if (file == NULL) {
+    // Open the file
+    int fd = open(filename, O_RDONLY);
+    if (fd == -1) {
         perror("Error opening file");
         return;
     }
 
-    char line[MAX_LINE_LENGTH];
+    // Get the file size
+    off_t file_size = lseek(fd, 0, SEEK_END);
+    if (file_size == -1) {
+        perror("Error getting file size");
+        close(fd);
+        return;
+    }
+    lseek(fd, 0, SEEK_SET);  // Reset to the beginning
+
+    // Map the file into memory
+    char *file_data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (file_data == MAP_FAILED) {
+        perror("Error mapping file");
+        close(fd);
+        return;
+    }
+    close(fd);
+
+    // Prepare counters for date, time, level, and component counts
+    Counter date_counts[MAX_UNIQUE] = {0};
+    Counter time_counts[MAX_UNIQUE] = {0};
+    Counter level_counts[MAX_UNIQUE] = {0};
+    Counter component_counts[MAX_UNIQUE] = {0};
+
+    size_t n_dates = 0, n_times = 0, n_levels = 0, n_components = 0;
+    size_t total = 0;
+
+    char *line_start = file_data;
+    char *line_end = strchr(line_start, '\n');
     LogEntry log_entry;
+    char line_buffer[MAX_LINE_LENGTH];
 
-    // Read file line by line
-    while (fgets(line, sizeof(line), file)) {
-        // Strip newline character if it exists
-        line[strcspn(line, "\n")] = '\0';
+    // Process the file line by line
+    while (line_end != NULL) {
+        size_t len = line_end - line_start;
+        if (len >= sizeof(line_buffer)) len = sizeof(line_buffer)-1;
+        strncpy(line_buffer, line_start, len);
+        line_buffer[len] = '\0';  // Safe null-termination
 
-        // Parse the line into LogEntry structure
-        if (parse_log_line(line, &log_entry)) {
-            // Process the log entry (for example, display it)
-            printf("LineId: %d\n", log_entry.LineId);
-            printf("Date: %s\n", log_entry.Date);
-            printf("Time: %s\n", log_entry.Time);
-            printf("Level: %s\n", log_entry.Level);
-            printf("Component: %s\n", log_entry.Component);
-            printf("Content: %s\n\n", log_entry.Content);
+        if (parse_log_line(line_buffer, &log_entry)) {
+            total++;
+            incr_counter(date_counts, &n_dates, MAX_UNIQUE, log_entry.Date);
+            incr_counter(time_counts, &n_times, MAX_UNIQUE, log_entry.Time);
+            incr_counter(level_counts, &n_levels, MAX_UNIQUE, log_entry.Level);
+            incr_counter(component_counts, &n_components, MAX_UNIQUE, log_entry.Component);
+
+            // Output the full row information
+            printf("LineId: %d, Date: %s, Time: %s, Level: %s, Component: %s, Content: %s\n",
+                log_entry.LineId, log_entry.Date, log_entry.Time, log_entry.Level, log_entry.Component, log_entry.Content);
         } else {
-            printf("Error parsing line: %s\n", line);
+            fprintf(stderr, "Error parsing line %zu\n", total+1);
         }
+
+        // Move to the next line
+        line_start = line_end + 1;
+        line_end = strchr(line_start, '\n');
     }
 
-    fclose(file);
+    // Print the summary statistics
+    printf("\nProcessed %zu log entries.\n\n", total);
+
+    printf("=== Date Counts ===\n");
+    for (size_t i = 0; i < n_dates; i++) {
+        printf("  %-10s: %zu\n", date_counts[i].name, date_counts[i].count);
+    }
+
+    printf("\n=== Time Counts ===\n");
+    for (size_t i = 0; i < n_times; i++) {
+        printf("  %-8s: %zu\n", time_counts[i].name, time_counts[i].count);
+    }
+
+    printf("\n=== Log Level Counts ===\n");
+    for (size_t i = 0; i < n_levels; i++) {
+        printf("  %-10s: %zu\n", level_counts[i].name, level_counts[i].count);
+    }
+
+    printf("\n=== Component Counts ===\n");
+    for (size_t i = 0; i < n_components; i++) {
+        printf("  %-20s: %zu\n", component_counts[i].name, component_counts[i].count);
+    }
+
+    // Clean up mmap
+    munmap(file_data, file_size);
 }
 
 int main() {
-    const char *log_file = "c:/Users/Burne/Downloads/Windows_logs.log_structured.csv";  // Replace with your actual file path
+    const char *log_file = "/home/kali/Downloads/Windows_2k.log_structured.csv";  
     process_log_file(log_file);
     return 0;
 }

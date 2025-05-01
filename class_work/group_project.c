@@ -8,7 +8,7 @@
 #define MAX_LINE_LENGTH 1024
 #define MAX_UNIQUE      100  // Adjusted to account for a higher number of unique items (dates, times, components, levels)
 
-// Structure to hold the log entry
+// Structure to hold the log entries
 typedef struct {
     int  LineId;
     char Date[11];      // YYYY-MM-DD
@@ -20,7 +20,7 @@ typedef struct {
 
 // Simple name→count bucket
 typedef struct {
-    char  name[50];
+    char  name[50]; //atmost the name can be 50 characters
     size_t count;
 } Counter;
 
@@ -96,13 +96,14 @@ void process_log_file(const char *filename) {
     lseek(fd, 0, SEEK_SET);  // Reset to the beginning
 
     // Map the file into memory
+    //utilizing mmap
     char *file_data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (file_data == MAP_FAILED) {
         perror("Error mapping file");
         close(fd);
         return;
     }
-    close(fd);
+    close(fd); //Closes the file
 
     // Prepare counters for date, time, level, and component counts
     Counter date_counts[MAX_UNIQUE] = {0};

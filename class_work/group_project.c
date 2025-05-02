@@ -1,3 +1,10 @@
+// The Link of the raw data log file: https://github.com/logpai/loghub/blob/master/Windows/Windows_2k.log_structured.csv
+// Feature of the dataset that I will be working with:
+// Is a .csv
+// Has 2000 rows of data
+// 6 columns per rows
+// column categories: LineId, Date, Time, Level, Component, Content
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,31 +31,36 @@ typedef struct {
     size_t count;
 } Counter;
 
+
 // Parse one CSV line into log_entry; returns 1 on success
 int parse_log_line(char *line, LogEntry *log_entry) {
     char *token;
 
-    // Get LineId
+    // Getting LineId
+    //breaks the input string line into smaller tokens (substrings) based on the delimiter ,
+    //After each strtok call, the code checks if token is NULL. If it is NULL, it means 
+    //that either the CSV line is malformed or that there are missing fields. In this case, 
+    //the function returns 0 to indicate failure.
     token = strtok(line, ",");
     if (token == NULL) return 0;
     log_entry->LineId = atoi(token);
 
-    // Get Date
+    // Getting Date
     token = strtok(NULL, ",");
     if (token == NULL) return 0;
     strncpy(log_entry->Date, token, sizeof(log_entry->Date)-1);
 
-    // Get Time
+    // Getting Time
     token = strtok(NULL, ",");
     if (token == NULL) return 0;
     strncpy(log_entry->Time, token, sizeof(log_entry->Time)-1);
 
-    // Get Level
+    // Getting Level
     token = strtok(NULL, ",");
     if (token == NULL) return 0;
     strncpy(log_entry->Level, token, sizeof(log_entry->Level)-1);
 
-    // Get Component
+    // Getting Component
     token = strtok(NULL, ",");
     if (token == NULL) return 0;
     strncpy(log_entry->Component, token, sizeof(log_entry->Component)-1);
@@ -61,7 +73,11 @@ int parse_log_line(char *line, LogEntry *log_entry) {
     return 1; // Successfully parsed
 }
 
+
 // Look up key in counters[0..*n), bump its count, or add a new bucket
+//The incr_counter function checks if a given key (e.g., date, time, level) exists
+//in an array of Counter structs. If the key exists, it increments its count. If the key 
+//doesn't exist, it adds a new counter with a count of 1
 void incr_counter(Counter *counters, size_t *n, size_t max, const char *key) {
     for (size_t i = 0; i < *n; i++) {
         if (strcmp(counters[i].name, key) == 0) {
@@ -87,6 +103,8 @@ void process_log_file(const char *filename) {
     }
 
     // Get the file size
+    // moves the file pointer to the end of the file and returns the size of the file.
+    //If this fails, it prints an error and exits.
     off_t file_size = lseek(fd, 0, SEEK_END);
     if (file_size == -1) {
         perror("Error getting file size");
@@ -97,6 +115,8 @@ void process_log_file(const char *filename) {
 
     // Map the file into memory
     //utilizing mmap
+    //maps the entire file into memory so that it can be accessed directly as a large 
+    //block of memory.
     char *file_data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (file_data == MAP_FAILED) {
         perror("Error mapping file");
@@ -172,8 +192,17 @@ void process_log_file(const char *filename) {
     munmap(file_data, file_size);
 }
 
+
+
+
 int main() {
     const char *log_file = "/home/kali/Downloads/Windows_2k.log_structured.csv";  
     process_log_file(log_file);
     return 0;
 }
+
+//This function processes a CSV log file efficiently using memory mapping (mmap), 
+//parses each line to extract data (like Date, Time, etc.), counts the occurrences of 
+//unique entries for those fields, and outputs the results. It uses memory-mapping to improve
+//performance when handling large files, avoiding the need to load the entire file into memory 
+//at once.

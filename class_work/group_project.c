@@ -1,7 +1,7 @@
 // The Link of the raw data log file: https://github.com/logpai/loghub/blob/master/Windows/Windows_2k.log_structured.csv
 // Feature of the dataset that I will be working with:
 // Is a .csv
-// Has 2000 rows of data
+// Has 2000 rows of data 
 // 6 columns per rows
 // column categories: LineId, Date, Time, Level, Component, Content
 

@@ -3,7 +3,7 @@
 // Is a .csv
 // Has 2000 rows of data 
 // 6 columns per rows
-// column categories: LineId, Date, Time, Level, Component, Content
+// column categories: LineId, Date, Time, Level, Component, Contentt
 
 #include <stdio.h>
 #include <stdlib.h>

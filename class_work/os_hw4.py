@@ -3,7 +3,7 @@ import argparse
 import sys
 
 def fcfs(requests, head):
-    """First-Come, First-Served: service requests in order of arrival:"""
+    """First-Come, First-Served: service requests in order of arrival:""" 
     total = abs(head - requests[0])
     for i in range(len(requests)-1):
         total += abs(requests[i] - requests[i+1])
